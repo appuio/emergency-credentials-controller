@@ -1,0 +1,26 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/name: prometheusrule
+    app.kubernetes.io/instance: controller-manager-alerts
+    app.kubernetes.io/component: alerts
+    app.kubernetes.io/created-by: emergency-credentials-controller
+    app.kubernetes.io/part-of: emergency-credentials-controller
+    app.kubernetes.io/managed-by: kustomize
+  name: controller-manager-alerts
+  namespace: system
+spec:
+  groups:
+    - name: token.alerts
+      rules:
+        - alert: EmergencyAccountTokenExiring
+          expr: (min(emergency_credentials_controller_verified_tokens_valid_until_seconds) by (emergency_account) - time()) < 604800
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            description: EmergencyAccount token expires in less than one week
+            summary: Renew expiring tokens to avoid losing access to the cluster

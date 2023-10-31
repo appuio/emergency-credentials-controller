@@ -7,5 +7,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: emergency-credentials-controller
 repo: github.com/appuio/emergency-credentials-controller
-resources: []
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: appuio.io
+  group: cluster
+  kind: EmergencyAccount
+  path: github.com/appuio/emergency-credentials-controller/api/v1beta1
+  version: v1beta1
 version: "3"

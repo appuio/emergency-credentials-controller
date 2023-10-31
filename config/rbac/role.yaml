@@ -7,8 +7,37 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - serviceaccounts
+  - secrets
   verbs:
+  - create
   - get
   - list
+  - patch
+  - update
   - watch
+- apiGroups:
+  - cluster.appuio.io
+  resources:
+  - emergencyaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cluster.appuio.io
+  resources:
+  - emergencyaccounts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - cluster.appuio.io
+  resources:
+  - emergencyaccounts/status
+  verbs:
+  - get
+  - patch
+  - update

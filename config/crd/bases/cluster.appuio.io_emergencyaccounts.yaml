@@ -1,0 +1,149 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: emergencyaccounts.cluster.appuio.io
+spec:
+  group: cluster.appuio.io
+  names:
+    kind: EmergencyAccount
+    listKind: EmergencyAccountList
+    plural: emergencyaccounts
+    singular: emergencyaccount
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: EmergencyAccount is the Schema for the emergencyaccounts API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EmergencyAccountSpec defines the desired state of EmergencyAccount
+            properties:
+              checkInterval:
+                default: 5m
+                description: CheckInterval is the interval in which the tokens are
+                  checked for validity.
+                format: duration
+                type: string
+              minRecreateInterval:
+                default: 5m
+                description: MinRecreateInterval is the minimum interval in which
+                  a new token is created.
+                format: duration
+                type: string
+              minValidityDurationLeft:
+                default: 168h
+                description: MinValidityDurationLeft is the minimum duration the token
+                  must be valid. A new token is created if the current token is not
+                  valid for this duration anymore.
+                format: duration
+                type: string
+              tokenStores:
+                description: TokenStore defines the stores the created tokens are
+                  stored in.
+                items:
+                  description: TokenStore defines the store the created tokens are
+                    stored in
+                  properties:
+                    logStore:
+                      description: LogSpec configures the log store. The log store
+                        outputs the token to the log but does not store it anywhere.
+                      type: object
+                    name:
+                      description: Name is the name of the store. Must be unique within
+                        the EmergencyAccount
+                      type: string
+                    secretStore:
+                      description: SecretSpec configures the secret store. The secret
+                        store saves the tokens in a secret in the same namespace as
+                        the EmergencyAccount.
+                      type: object
+                    type:
+                      description: Type defines the type of the store to use. Currently
+                        `secret`` and `log` stores are supported. The stores can be
+                        further configured in the corresponding storeSpec.
+                      enum:
+                      - secret
+                      - log
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                minItems: 1
+                type: array
+              validityDuration:
+                default: 720h
+                description: ValidityDuration is the duration for which the tokens
+                  are valid.
+                format: duration
+                type: string
+            required:
+            - validityDuration
+            type: object
+          status:
+            description: EmergencyAccountStatus defines the observed state of EmergencyAccount
+            properties:
+              lastTokenCreationTimestamp:
+                description: LastTokenCreationTimestamp is the timestamp when the
+                  last token was created.
+                format: date-time
+                type: string
+              tokens:
+                description: Tokens is a list of tokens that have been created
+                items:
+                  description: TokenStatus defines the observed state of the managed
+                    token
+                  properties:
+                    expirationTimestamp:
+                      description: ExpirationTimestamp is the timestamp when the token
+                        expires
+                      format: date-time
+                      type: string
+                    refs:
+                      description: Refs holds references to the token in the configured
+                        stores.
+                      items:
+                        properties:
+                          ref:
+                            description: Ref is a reference to the token. The used
+                              storage should be able to uniquely identify the token.
+                              If no ref is given, the token is not checked for validity.
+                            type: string
+                          store:
+                            description: Store is the name of the store the token
+                              is stored in.
+                            type: string
+                        required:
+                        - store
+                        type: object
+                      type: array
+                    uid:
+                      description: UID is the unique identifier of the token. Currently
+                        only used for error messages.
+                      type: string
+                  required:
+                  - expirationTimestamp
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
