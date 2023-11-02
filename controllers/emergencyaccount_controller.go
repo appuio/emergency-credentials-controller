@@ -35,12 +35,12 @@ type EmergencyAccountReconciler struct {
 	Clock Clock
 }
 
-//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts/finalizers,verbs=update
+//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts,verbs=get;list;watch;create;update;patch;delete,namespace="system"
+//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts/status,verbs=get;update;patch,namespace="system"
+//+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts/finalizers,verbs=update,namespace="system"
 
-//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=serviceaccounts/token,verbs=create
+//+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete,namespace="system"
+//+kubebuilder:rbac:groups="",resources=serviceaccounts/token,verbs=create,namespace="system"
 
 //+kubebuilder:rbac:groups=authentication.k8s.io,resources=tokenreviews,verbs=create
 
