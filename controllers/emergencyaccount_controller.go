@@ -40,6 +40,9 @@ type EmergencyAccountReconciler struct {
 //+kubebuilder:rbac:groups=cluster.appuio.io,resources=emergencyaccounts/finalizers,verbs=update
 
 //+kubebuilder:rbac:groups="",resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=serviceaccounts/token,verbs=create
+
+//+kubebuilder:rbac:groups=authentication.k8s.io,resources=tokenreviews,verbs=create
 
 // Reconcile reconciles the EmergencyAccount resource.
 // It creates a service account with the same name and namespace as the EmergencyAccount and requests a token for it.
