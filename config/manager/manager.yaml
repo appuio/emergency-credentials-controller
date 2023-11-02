@@ -43,6 +43,7 @@ spec:
       containers:
       - args:
         - --leader-elect
+        - --namespace=$(POD_NAMESPACE)
         env:
         - name: POD_NAMESPACE
           valueFrom:
