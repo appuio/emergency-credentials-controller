@@ -1,0 +1,14 @@
+apiVersion: cluster.appuio.io/v1beta1
+kind: EmergencyAccount
+metadata:
+  labels:
+    app.kubernetes.io/name: emergencyaccount
+    app.kubernetes.io/instance: emergencyaccount-sample
+    app.kubernetes.io/part-of: emergency-credentials-controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: emergency-credentials-controller
+  name: emergencyaccount-sample
+spec:
+  tokenStores:
+  - name: secret
+    type: secret
