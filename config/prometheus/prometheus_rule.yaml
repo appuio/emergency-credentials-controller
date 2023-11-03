@@ -16,7 +16,7 @@ spec:
   groups:
     - name: token.alerts
       rules:
-        - alert: EmergencyAccountTokenExiring
+        - alert: EmergencyAccountTokenExpiring
           expr: (min(emergency_credentials_controller_verified_tokens_valid_until_seconds) by (emergency_account) - time()) < 604800
           for: 1h
           labels:
