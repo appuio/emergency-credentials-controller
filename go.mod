@@ -1,6 +1,6 @@
 module github.com/appuio/emergency-credentials-controller
 
-go 1.21.3
+go 1.21.5
 
 require (
 	github.com/go-logr/logr v1.3.0
