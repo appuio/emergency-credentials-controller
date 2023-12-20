@@ -52,10 +52,10 @@ type TokenStoreSpec struct {
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// Type defines the type of the store to use.
-	// Currently `secret`` and `log` stores are supported.
+	// Currently `secret`, `s3`, and `log` stores are supported.
 	// The stores can be further configured in the corresponding storeSpec.
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=secret;log
+	// +kubebuilder:validation:Enum=secret;log;s3
 	Type string `json:"type"`
 
 	// SecretSpec configures the secret store.
@@ -64,6 +64,58 @@ type TokenStoreSpec struct {
 	// LogSpec configures the log store.
 	// The log store outputs the token to the log but does not store it anywhere.
 	LogSpec LogStoreSpec `json:"logStore,omitempty"`
+	// S3Spec configures the S3 store.
+	// The S3 store saves the tokens in an S3 bucket.
+	S3Spec S3StoreSpec `json:"s3Store,omitempty"`
+}
+
+// S3StoreSpec configures the S3 store.
+// The S3 store saves the tokens in an S3 bucket with optional encryption using PGP public keys.
+type S3StoreSpec struct {
+	// ObjectNameTemplate is the template for the object name to use.
+	// Sprig functions can be used to generate the object name.
+	// If not set, the object name is the name of the EmergencyAccount.
+	// The name of the EmergencyAccount can be accessed with `{{ .Name }}`.
+	// The namespace of the EmergencyAccount can be accessed with `{{ .Namespace }}`.
+	// The full EmergencyAccount object can be accessed with `{{ .EmergencyAccount }}`.
+	// Additional context can be passed with the `objectNameTemplateContext` field and is accessible with `{{ .Context.<key> }}`.
+	// +kubebuilder:validation:Optional
+	ObjectNameTemplate string `json:"objectNameTemplate,omitempty"`
+	// ObjectNameTemplateContext is the additional context to use for the object name template.
+	// +kubebuilder:validation:Optional
+	ObjectNameTemplateContext map[string]string `json:"objectNameTemplateContext,omitempty"`
+
+	S3 S3Spec `json:"s3"`
+	// Encryption defines the encryption settings for the S3 store.
+	// If not set, the tokens are stored unencrypted.
+	// +kubebuilder:validation:Optional
+	Encryption S3EncryptionSpec `json:"encryption,omitempty"`
+}
+
+type S3Spec struct {
+	// Endpoint is the S3 endpoint to use.
+	Endpoint string `json:"endpoint"`
+	// Bucket is the S3 bucket to use.
+	Bucket string `json:"bucket"`
+
+	// AccessKeyId and SecretAccessKey are the S3 credentials to use.
+	AccessKeyId string `json:"accessKeyId"`
+	// SecretAccessKey is the S3 secret access key to use.
+	SecretAccessKey string `json:"secretAccessKey"`
+
+	// Region is the AWS region to use.
+	Region string `json:"region,omitempty"`
+	// Insecure allows to use an insecure connection to the S3 endpoint.
+	Insecure bool `json:"insecure,omitempty"`
+}
+
+type S3EncryptionSpec struct {
+	// Encrypt defines if the tokens should be encrypted.
+	// If not set, the tokens are stored unencrypted.
+	Encrypt bool `json:"encrypt,omitempty"`
+	// PGPKeys is a list of PGP public keys to encrypt the tokens with.
+	// At least one key must be given if encryption is enabled.
+	PGPKeys []string `json:"pgpKeys,omitempty"`
 }
 
 // SecretStoreSpec configures the secret store.

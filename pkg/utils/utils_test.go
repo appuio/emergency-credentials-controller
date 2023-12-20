@@ -15,3 +15,50 @@ func Test_ParseJWTWithoutVerify(t *testing.T) {
 	_, err = utils.ParseJWTWithoutVerify(v)
 	require.NoError(t, err)
 }
+
+func Test_SplitPublicKeyBlocks(t *testing.T) {
+	input := `
+leading garbage
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 1
+-----END PGP PUBLIC KEY BLOCK-----
+Some other content
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 2
+-----END PGP PUBLIC KEY BLOCK-----`
+
+	expected := []string{
+		`-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 1
+-----END PGP PUBLIC KEY BLOCK-----`,
+		`-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 2
+-----END PGP PUBLIC KEY BLOCK-----`,
+	}
+
+	result, err := utils.SplitPublicKeyBlocks(input)
+	require.NoError(t, err)
+	require.Equal(t, expected, result)
+}
+
+func Test_SplitPublicKeyBlocks_UnmatchedBegin(t *testing.T) {
+	input := `
+leading garbage
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 1
+-----END PGP PUBLIC KEY BLOCK-----
+Some other content
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+asdasd
+`
+
+	expected := []string{
+		`-----BEGIN PGP PUBLIC KEY BLOCK-----
+Public Key Block 1
+-----END PGP PUBLIC KEY BLOCK-----`,
+	}
+
+	result, err := utils.SplitPublicKeyBlocks(input)
+	require.Error(t, err)
+	require.Equal(t, expected, result)
+}
