@@ -27,5 +27,8 @@ func FromSpec(sts emcv1beta1.TokenStoreSpec) (TokenStorer, error) {
 	if sts.Type == "log" {
 		return NewLogStore(sts.LogSpec), nil
 	}
+	if sts.Type == "s3" {
+		return NewS3Store(sts.S3Spec), nil
+	}
 	return nil, fmt.Errorf("unknown token store type %s", sts.Type)
 }
