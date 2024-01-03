@@ -8,7 +8,7 @@ require (
 	github.com/go-logr/logr v1.3.0
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/minio/minio-go/v7 v7.0.66
-	github.com/prometheus/client_golang v1.17.0
+	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/multierr v1.11.0
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
