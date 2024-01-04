@@ -23,6 +23,8 @@ import (
 	"github.com/appuio/emergency-credentials-controller/controllers/stores"
 )
 
+const EmergencyAccountFinalizer = "emergencyaccounts.cluster.appuio.io/finalizer"
+
 type Clock interface {
 	Now() time.Time
 }
@@ -58,6 +60,24 @@ func (r *EmergencyAccountReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, fmt.Errorf("unable to get EmergencyAccount resource: %w", err)
+	}
+
+	if instance.DeletionTimestamp != nil {
+		l.Info("EmergencyAccount resource is being deleted")
+		deleteVerifiedTokensValidUntil(instance.Name)
+		if controllerutil.RemoveFinalizer(instance, EmergencyAccountFinalizer) {
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, fmt.Errorf("unable to remove finalizer: %w", err)
+			}
+		}
+		return ctrl.Result{}, nil
+	}
+
+	if controllerutil.AddFinalizer(instance, EmergencyAccountFinalizer) {
+		if err := r.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, fmt.Errorf("unable to add finalizer: %w", err)
+		}
+		return ctrl.Result{}, nil
 	}
 
 	sa, err := r.reconcileSA(ctx, instance)

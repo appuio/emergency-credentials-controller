@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr/testr"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/require"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	emcv1beta1 "github.com/appuio/emergency-credentials-controller/api/v1beta1"
@@ -55,8 +57,15 @@ func Test_EmergencyAccountReconciler_Reconcile(t *testing.T) {
 		Clock:  clock,
 	}
 
-	// Create token
+	// Create finalizer
 	_, err := subject.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(ea)})
+	require.NoError(t, err)
+	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
+	t.Logf("status %+v", ea.Status)
+	require.Len(t, ea.Finalizers, 1, "finalizer should be created")
+
+	// Create token
+	_, err = subject.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(ea)})
 	require.NoError(t, err)
 	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
 	t.Logf("status %+v", ea.Status)
@@ -97,6 +106,17 @@ func Test_EmergencyAccountReconciler_Reconcile(t *testing.T) {
 	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
 	t.Logf("status %+v", ea.Status)
 	require.Len(t, ea.Status.Tokens, 3, "should add a new token")
+
+	// Finalizer should be removed and no metric left
+	require.NoError(t, c.Delete(ctx, ea))
+	deleted := &emcv1beta1.EmergencyAccount{}
+	_, err = subject.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(ea)})
+	require.NoError(t, err)
+	require.Error(t, c.Get(ctx, client.ObjectKeyFromObject(ea), deleted))
+	require.Len(t, deleted.Finalizers, 0, "finalizer should be removed")
+	ml, err := testutil.GatherAndCount(metrics.Registry, MetricsNamespace+"_verified_tokens_valid_until_seconds")
+	require.NoError(t, err)
+	require.Equal(t, 0, ml, "metric should be removed")
 }
 
 type fakeClientControl struct {

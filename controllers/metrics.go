@@ -18,6 +18,10 @@ var (
 	)
 )
 
+func deleteVerifiedTokensValidUntil(emergencyAccount string) {
+	verifiedTokensValidUntil.Delete(prometheus.Labels{"emergency_account": emergencyAccount})
+}
+
 func init() {
 	metrics.Registry.MustRegister(verifiedTokensValidUntil)
 }
