@@ -1,6 +1,6 @@
 module github.com/appuio/emergency-credentials-controller
 
-go 1.21.6
+go 1.22.0
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
