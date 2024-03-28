@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/gob"
 	"fmt"
 	"time"
 
@@ -85,6 +87,31 @@ func (r *EmergencyAccountReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, fmt.Errorf("unable to reconcile ServiceAccount: %w", err)
 	}
 
+	var configChanged bool
+	for _, store := range instance.Spec.TokenStores {
+		refI := slices.IndexFunc(instance.Status.LastTokenStoreHashes, func(ref emcv1beta1.TokenStoreHash) bool {
+			return store.Name == ref.Name
+		})
+		hw := sha256.New()
+		if err := gob.NewEncoder(hw).Encode(store); err != nil {
+			return ctrl.Result{}, fmt.Errorf("unable to hash store configuration: %w", err)
+		}
+		hsh := fmt.Sprintf("%x", hw.Sum(nil))
+		if refI >= 0 && instance.Status.LastTokenStoreHashes[refI].Sha256 == hsh {
+			continue
+		}
+		l.Info("store configuration changed", "store", store.Name, "hash", hsh)
+		configChanged = configChanged || true
+		if refI == -1 {
+			instance.Status.LastTokenStoreHashes = append(instance.Status.LastTokenStoreHashes, emcv1beta1.TokenStoreHash{
+				Name:   store.Name,
+				Sha256: hsh,
+			})
+		} else {
+			instance.Status.LastTokenStoreHashes[refI].Sha256 = hsh
+		}
+	}
+
 	verified, failedVerification := r.verifyTokens(ctx, instance)
 	if len(failedVerification) > 0 {
 		us := make([]string, len(failedVerification))
@@ -108,11 +135,11 @@ func (r *EmergencyAccountReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			nValidityLeft++
 		}
 	}
-	if nValidityLeft > 0 {
+	if nValidityLeft > 0 && !configChanged {
 		l.Info("enough tokens have validity left, not creating new one", "ntokens", nValidityLeft)
 		return ctrl.Result{RequeueAfter: instance.Spec.CheckInterval.Duration}, nil
 	}
-	l.Info("not enough tokens have validity left, creating new one")
+	l.Info("not enough tokens have validity left or store config changed, creating new one")
 
 	if instance.Status.LastTokenCreationTimestamp.Add(instance.Spec.MinRecreateInterval.Duration).After(r.Clock.Now()) {
 		l.Info("last token creation too recent, not creating a new one")
