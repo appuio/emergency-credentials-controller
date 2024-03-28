@@ -63,6 +63,13 @@ spec:
                     logStore:
                       description: LogSpec configures the log store. The log store
                         outputs the token to the log but does not store it anywhere.
+                      properties:
+                        additionalFields:
+                          additionalProperties:
+                            type: string
+                          description: AdditionalFields is a map of additional fields
+                            to log.
+                          type: object
                       type: object
                     name:
                       description: Name is the name of the store. Must be unique within
@@ -175,6 +182,24 @@ spec:
                   last token was created.
                 format: date-time
                 type: string
+              lastTokenStoreConfigurationHashes:
+                description: LastTokenStoreConfigurationHashes is the hash of the
+                  last token store configuration. It is used to detect changes in
+                  the token store configuration. A change in the configuration triggers
+                  the creation of a new token.
+                items:
+                  properties:
+                    hash:
+                      description: Sha256 is the hash of the store configuration.
+                      type: string
+                    name:
+                      description: Name is the name of the store.
+                      type: string
+                  required:
+                  - hash
+                  - name
+                  type: object
+                type: array
               tokens:
                 description: Tokens is a list of tokens that have been created
                 items:

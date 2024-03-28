@@ -82,13 +82,24 @@ func Test_EmergencyAccountReconciler_Reconcile(t *testing.T) {
 	require.Len(t, ea.Status.Tokens, 1, "should not have created a new token")
 	require.WithinDuration(t, lastTimestamp, ea.Status.LastTokenCreationTimestamp.Time, 0, "last created timestamp should not have changed")
 
+	// Modify token store
+	ea.Spec.TokenStores[1].LogSpec = emcv1beta1.LogStoreSpec{
+		AdditionalFields: map[string]string{"test": "test"},
+	}
+	require.NoError(t, c.Update(ctx, ea))
+	_, err = subject.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(ea)})
+	require.NoError(t, err)
+	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
+	t.Logf("status %+v", ea.Status)
+	require.Len(t, ea.Status.Tokens, 2, "should add a new token")
+
 	// Check token - too old and renew
 	clock.Advance(12 * time.Hour)
 	_, err = subject.Reconcile(ctx, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(ea)})
 	require.NoError(t, err)
 	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
 	t.Logf("status %+v", ea.Status)
-	require.Len(t, ea.Status.Tokens, 2, "should add a new token")
+	require.Len(t, ea.Status.Tokens, 3, "should add a new token")
 
 	// Check token - verification fails
 	clock.Advance(time.Minute)
@@ -97,7 +108,7 @@ func Test_EmergencyAccountReconciler_Reconcile(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
 	t.Logf("status %+v", ea.Status)
-	require.Len(t, ea.Status.Tokens, 2, "still in MinRecreateInterval, should not have created a new token")
+	require.Len(t, ea.Status.Tokens, 3, "still in MinRecreateInterval, should not have created a new token")
 
 	// Check token - verification fails, but MinRecreateInterval is over
 	clock.Advance(5 * time.Minute)
@@ -105,7 +116,7 @@ func Test_EmergencyAccountReconciler_Reconcile(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, c.Get(ctx, client.ObjectKeyFromObject(ea), ea))
 	t.Logf("status %+v", ea.Status)
-	require.Len(t, ea.Status.Tokens, 3, "should add a new token")
+	require.Len(t, ea.Status.Tokens, 4, "should add a new token")
 
 	// Finalizer should be removed and no metric left
 	require.NoError(t, c.Delete(ctx, ea))

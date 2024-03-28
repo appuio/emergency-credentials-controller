@@ -43,6 +43,10 @@ type EmergencyAccountStatus struct {
 	LastTokenCreationTimestamp metav1.Time `json:"lastTokenCreationTimestamp,omitempty"`
 	// Tokens is a list of tokens that have been created
 	Tokens []TokenStatus `json:"tokens,omitempty"`
+	// LastTokenStoreConfigurationHashes is the hash of the last token store configuration.
+	// It is used to detect changes in the token store configuration.
+	// A change in the configuration triggers the creation of a new token.
+	LastTokenStoreHashes []TokenStoreHash `json:"lastTokenStoreConfigurationHashes,omitempty"`
 }
 
 // TokenStore defines the store the created tokens are stored in
@@ -124,7 +128,10 @@ type SecretStoreSpec struct{}
 
 // LogStoreSpec configures the log store.
 // The log store outputs the token to the log but does not store it anywhere.
-type LogStoreSpec struct{}
+type LogStoreSpec struct {
+	// AdditionalFields is a map of additional fields to log.
+	AdditionalFields map[string]string `json:"additionalFields,omitempty"`
+}
 
 // TokenStatus defines the observed state of the managed token
 type TokenStatus struct {
@@ -145,6 +152,13 @@ type TokenStatusRef struct {
 
 	// Store is the name of the store the token is stored in.
 	Store string `json:"store"`
+}
+
+type TokenStoreHash struct {
+	// Name is the name of the store.
+	Name string `json:"name"`
+	// Sha256 is the hash of the store configuration.
+	Sha256 string `json:"hash"`
 }
 
 //+kubebuilder:object:root=true
