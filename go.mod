@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/ProtonMail/gopenpgp/v2 v2.7.5
 	github.com/go-logr/logr v1.4.1
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/minio/minio-go/v7 v7.0.69
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
