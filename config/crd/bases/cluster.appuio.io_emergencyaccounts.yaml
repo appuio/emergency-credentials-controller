@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.13.0
+    controller-gen.kubebuilder.io/version: v0.20.0
   name: emergencyaccounts.cluster.appuio.io
 spec:
   group: cluster.appuio.io
@@ -20,14 +20,19 @@ spec:
         description: EmergencyAccount is the Schema for the emergencyaccounts API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -48,9 +53,9 @@ spec:
                 type: string
               minValidityDurationLeft:
                 default: 168h
-                description: MinValidityDurationLeft is the minimum duration the token
-                  must be valid. A new token is created if the current token is not
-                  valid for this duration anymore.
+                description: |-
+                  MinValidityDurationLeft is the minimum duration the token must be valid.
+                  A new token is created if the current token is not valid for this duration anymore.
                 format: duration
                 type: string
               tokenStores:
@@ -61,8 +66,9 @@ spec:
                     stored in
                   properties:
                     logStore:
-                      description: LogSpec configures the log store. The log store
-                        outputs the token to the log but does not store it anywhere.
+                      description: |-
+                        LogSpec configures the log store.
+                        The log store outputs the token to the log but does not store it anywhere.
                       properties:
                         additionalFields:
                           additionalProperties:
@@ -72,40 +78,42 @@ spec:
                           type: object
                       type: object
                     name:
-                      description: Name is the name of the store. Must be unique within
-                        the EmergencyAccount
+                      description: |-
+                        Name is the name of the store.
+                        Must be unique within the EmergencyAccount
                       type: string
                     s3Store:
-                      description: S3Spec configures the S3 store. The S3 store saves
-                        the tokens in an S3 bucket.
+                      description: |-
+                        S3Spec configures the S3 store.
+                        The S3 store saves the tokens in an S3 bucket.
                       properties:
                         encryption:
-                          description: Encryption defines the encryption settings
-                            for the S3 store. If not set, the tokens are stored unencrypted.
+                          description: |-
+                            Encryption defines the encryption settings for the S3 store.
+                            If not set, the tokens are stored unencrypted.
                           properties:
                             encrypt:
-                              description: Encrypt defines if the tokens should be
-                                encrypted. If not set, the tokens are stored unencrypted.
+                              description: |-
+                                Encrypt defines if the tokens should be encrypted.
+                                If not set, the tokens are stored unencrypted.
                               type: boolean
                             pgpKeys:
-                              description: PGPKeys is a list of PGP public keys to
-                                encrypt the tokens with. At least one key must be
-                                given if encryption is enabled.
+                              description: |-
+                                PGPKeys is a list of PGP public keys to encrypt the tokens with.
+                                At least one key must be given if encryption is enabled.
                               items:
                                 type: string
                               type: array
                           type: object
                         objectNameTemplate:
-                          description: ObjectNameTemplate is the template for the
-                            object name to use. Sprig functions can be used to generate
-                            the object name. If not set, the object name is the name
-                            of the EmergencyAccount. The name of the EmergencyAccount
-                            can be accessed with `{{ .Name }}`. The namespace of the
-                            EmergencyAccount can be accessed with `{{ .Namespace }}`.
-                            The full EmergencyAccount object can be accessed with
-                            `{{ .EmergencyAccount }}`. Additional context can be passed
-                            with the `objectNameTemplateContext` field and is accessible
-                            with `{{ .Context.<key> }}`.
+                          description: |-
+                            ObjectNameTemplate is the template for the object name to use.
+                            Sprig functions can be used to generate the object name.
+                            If not set, the object name is the name of the EmergencyAccount.
+                            The name of the EmergencyAccount can be accessed with `{{ .Name }}`.
+                            The namespace of the EmergencyAccount can be accessed with `{{ .Namespace }}`.
+                            The full EmergencyAccount object can be accessed with `{{ .EmergencyAccount }}`.
+                            Additional context can be passed with the `objectNameTemplateContext` field and is accessible with `{{ .Context.<key> }}`.
                           type: string
                         objectNameTemplateContext:
                           additionalProperties:
@@ -146,14 +154,15 @@ spec:
                       - s3
                       type: object
                     secretStore:
-                      description: SecretSpec configures the secret store. The secret
-                        store saves the tokens in a secret in the same namespace as
-                        the EmergencyAccount.
+                      description: |-
+                        SecretSpec configures the secret store.
+                        The secret store saves the tokens in a secret in the same namespace as the EmergencyAccount.
                       type: object
                     type:
-                      description: Type defines the type of the store to use. Currently
-                        `secret`, `s3`, and `log` stores are supported. The stores
-                        can be further configured in the corresponding storeSpec.
+                      description: |-
+                        Type defines the type of the store to use.
+                        Currently `secret`, `s3`, and `log` stores are supported.
+                        The stores can be further configured in the corresponding storeSpec.
                       enum:
                       - secret
                       - log
@@ -183,10 +192,10 @@ spec:
                 format: date-time
                 type: string
               lastTokenStoreConfigurationHashes:
-                description: LastTokenStoreConfigurationHashes is the hash of the
-                  last token store configuration. It is used to detect changes in
-                  the token store configuration. A change in the configuration triggers
-                  the creation of a new token.
+                description: |-
+                  LastTokenStoreConfigurationHashes is the hash of the last token store configuration.
+                  It is used to detect changes in the token store configuration.
+                  A change in the configuration triggers the creation of a new token.
                 items:
                   properties:
                     hash:
@@ -217,8 +226,8 @@ spec:
                       items:
                         properties:
                           ref:
-                            description: Ref is a reference to the token. The used
-                              storage should be able to uniquely identify the token.
+                            description: |-
+                              Ref is a reference to the token. The used storage should be able to uniquely identify the token.
                               If no ref is given, the token is not checked for validity.
                             type: string
                           store:
@@ -230,8 +239,9 @@ spec:
                         type: object
                       type: array
                     uid:
-                      description: UID is the unique identifier of the token. Currently
-                        only used for error messages.
+                      description: |-
+                        UID is the unique identifier of the token.
+                        Currently only used for error messages.
                       type: string
                   required:
                   - expirationTimestamp
