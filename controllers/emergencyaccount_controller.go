@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+	"slices"
 	"time"
 
-	"golang.org/x/exp/slices"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
